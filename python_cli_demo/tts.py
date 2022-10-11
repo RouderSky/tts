@@ -60,7 +60,7 @@ async def transferMsTTSData(SSML_text, outputPath):
             getXTime() + '\r\nContent-Type: application/json\r\n\r\n' + payload_1
         await websocket.send(message_1)
 
-        payload_2 = '{"synthesis":{"audio":{"metadataOptions":{"sentenceBoundaryEnabled":false,"wordBoundaryEnabled":false},"outputFormat":"audio-16khz-32kbitrate-mono-mp3"}}}'
+        payload_2 = '{"synthesis":{"audio":{"metadataOptions":{"sentenceBoundaryEnabled":false,"wordBoundaryEnabled":false},"outputFormat":"audio-48khz-192kbitrate-mono-mp3"}}}'
         message_2 = 'Path : synthesis.context\r\nX-RequestId: ' + req_id + '\r\nX-Timestamp: ' + \
             getXTime() + '\r\nContent-Type: application/json\r\n\r\n' + payload_2
         await websocket.send(message_2)
