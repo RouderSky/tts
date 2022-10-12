@@ -60,7 +60,12 @@ async def transferMsTTSData(SSML_text, outputPath):
             getXTime() + '\r\nContent-Type: application/json\r\n\r\n' + payload_1
         await websocket.send(message_1)
 
-        payload_2 = '{"synthesis":{"audio":{"metadataOptions":{"sentenceBoundaryEnabled":false,"wordBoundaryEnabled":false},"outputFormat":"audio-48khz-192kbitrate-mono-mp3"}}}'
+        # ogg-24khz-16bit-mono-opus
+        # audio-24khz-48kbitrate-mono-mp3
+        # audio-24khz-96kbitrate-mono-mp3
+        # audio-48khz-96kbitrate-mono-mp3
+        # audio-48khz-192kbitrate-mono-mp3
+        payload_2 = '{"synthesis":{"audio":{"metadataOptions":{"sentenceBoundaryEnabled":false,"wordBoundaryEnabled":false},"outputFormat":"audio-48khz-96kbitrate-mono-mp3"}}}'
         message_2 = 'Path : synthesis.context\r\nX-RequestId: ' + req_id + '\r\nX-Timestamp: ' + \
             getXTime() + '\r\nContent-Type: application/json\r\n\r\n' + payload_2
         await websocket.send(message_2)
@@ -75,20 +80,24 @@ async def transferMsTTSData(SSML_text, outputPath):
         end_resp_pat = re.compile('Path:turn.end')
         audio_stream = b''
         while(True):
-            response = await websocket.recv()
-            print('receiving...')
-            # Make sure the message isn't telling us to stop
-            if (re.search(end_resp_pat, str(response)) == None):
-                # Check if our response is text data or the audio bytes
-                if type(response) == type(bytes()):
-                    # Extract binary data
-                    try:
-                        needle = b'Path:audio\r\n'
-                        start_ind = response.find(needle) + len(needle)
-                        audio_stream += response[start_ind:]
-                    except:
-                        pass
-            else:
+            try:
+                response = await websocket.recv()
+                print('receiving...')
+                # Make sure the message isn't telling us to stop
+                if (re.search(end_resp_pat, str(response)) == None):
+                    # Check if our response is text data or the audio bytes
+                    if type(response) == type(bytes()):
+                        # Extract binary data
+                        try:
+                            needle = b'Path:audio\r\n'
+                            start_ind = response.find(needle) + len(needle)
+                            audio_stream += response[start_ind:]
+                        except Exception as ex:
+                            print("出现如下异常:%s"%ex)
+                else:
+                    break
+            except Exception as ex:
+                print("出现如下异常:%s"%ex)
                 break
         with open(f'{outputPath}.mp3', 'wb') as audio_out:
             audio_out.write(audio_stream)
